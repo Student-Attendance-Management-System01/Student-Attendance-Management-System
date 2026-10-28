@@ -11,7 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** Boots the full application context (against in-memory H2) and checks the documented health response. */
 @SpringBootTest(properties={
  "spring.datasource.url=jdbc:h2:mem:sams;DB_CLOSE_DELAY=-1","spring.datasource.driver-class-name=org.h2.Driver","spring.datasource.username=sa","spring.datasource.password=",
- "spring.flyway.enabled=false","spring.jpa.hibernate.ddl-auto=create-drop"})
+ "spring.flyway.enabled=false","spring.jpa.hibernate.ddl-auto=create-drop",
+ "spring.security.enabled=false"})
 @AutoConfigureMockMvc
 class HealthEndpointTest {
  @Autowired MockMvc mvc;
