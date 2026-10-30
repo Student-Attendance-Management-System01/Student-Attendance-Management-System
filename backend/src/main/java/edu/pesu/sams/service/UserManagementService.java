@@ -38,11 +38,6 @@ public class UserManagementService {
    audit.record(actor,"USER_UPDATED","USER",u.getInstitutionId(),old,u.getFullName()+"|"+u.getEmail()+"|"+u.getRole()+"|"+u.isActive(),null,req);return userDto(u);
  }
  @Transactional public Map<String,Object> deactivateUser(Long id,String actor,HttpServletRequest req){UserAccount u=users.findById(id).orElseThrow(()->SamsException.notFound("User not found"));if(u.getEmail().equalsIgnoreCase(actor))throw SamsException.badRequest("You cannot deactivate your own account");u.setActive(false);audit.record(actor,"USER_DEACTIVATED","USER",u.getInstitutionId(),"active","inactive",null,req);return userDto(u);}
- @Transactional public Map<String,Object> createSection(CourseSectionRequest r,String actor,HttpServletRequest req){
-   CourseSection s=new CourseSection();s.setCourseCode(r.courseCode().trim().toUpperCase(Locale.ROOT));s.setCourseName(r.courseName().trim());s.setSemester(r.semester().trim());s.setSection(r.section().trim().toUpperCase(Locale.ROOT));s.setAcademicYear(r.academicYear().trim());
-   Set<UserAccount> faculty=new HashSet<>();for(Long id:r.facultyIds()) {UserAccount u=users.findById(id).orElseThrow(()->SamsException.notFound("Faculty user not found: "+id));if(u.getRole()!=UserRole.FACULTY||!u.isActive())throw SamsException.badRequest("Every assigned user must be an active Faculty member");faculty.add(u);}s.setFaculty(faculty);sections.save(s);
-   audit.record(actor,"COURSE_SECTION_CREATED","COURSE_SECTION",String.valueOf(s.getId()),null,s.getCourseCode()+"/"+s.getSection(),null,req);return sectionDto(s);
- }
  @Transactional(readOnly=true) public List<Map<String,Object>> listSections(String email,UserRole role){
    List<CourseSection> list;
    if(role==UserRole.ADMIN)list=sections.findAll();
