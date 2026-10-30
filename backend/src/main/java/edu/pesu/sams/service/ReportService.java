@@ -1,6 +1,8 @@
 package edu.pesu.sams.service;
 
-import com.lowagie.text.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.PdfPTable;
 import com.opencsv.CSVWriter;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.math.*;
 import java.time.*;
+import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
