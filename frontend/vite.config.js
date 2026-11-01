@@ -12,6 +12,12 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': { target: env.SAMS_API_PROXY || 'http://localhost:8080', changeOrigin: true }
       }
+    },
+    test: {
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.js',
+      css: false,
+      restoreMocks: true
     }
   };
 });

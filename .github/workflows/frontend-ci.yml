@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   frontend-build:
-    name: Build frontend
+    name: Test and build frontend
     runs-on: ubuntu-latest
 
     steps:
@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         working-directory: frontend
         run: npm ci --no-audit --no-fund
+
+      - name: Test
+        working-directory: frontend
+        run: npm test
 
       - name: Build
         working-directory: frontend

@@ -13,6 +13,17 @@ export function validateLogin(email, password) {
   return errors;
 }
 
+/**
+ * Only same-app paths are allowed as a post-login destination. Rejects
+ * protocol-relative ("//evil") and backslash ("/\\evil") forms that some
+ * routers/browsers treat as external (react-router open-redirect advisory).
+ */
+export function safeReturnPath(from) {
+  if (typeof from !== 'string' || !from.startsWith('/') || from.startsWith('//') || from.includes('\\')) return '/';
+  if (from.startsWith('/login') || from.startsWith('/reset-password')) return '/';
+  return from;
+}
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -32,8 +43,7 @@ export default function Login() {
     setBusy(true);
     try {
       await login(email, password);
-      const from = location.state?.from;
-      navigate(from && from !== '/login' ? from : '/', { replace: true });
+      navigate(safeReturnPath(location.state?.from), { replace: true });
     } catch (e) {
       setError(loginErrorMessage(e));
       setPassword('');
