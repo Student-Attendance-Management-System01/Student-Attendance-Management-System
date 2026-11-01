@@ -2,17 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, messageFrom } from '../api';
 import { useNotice } from '../notice';
-
-// Mirrors the backend PasswordPolicy so users see problems before submitting.
-export function passwordProblems(pw) {
-  const problems = [];
-  if (pw.length < 8) problems.push('at least 8 characters');
-  if (!/[A-Z]/.test(pw)) problems.push('an uppercase letter');
-  if (!/[a-z]/.test(pw)) problems.push('a lowercase letter');
-  if (!/\d/.test(pw)) problems.push('a number');
-  if (!/[^A-Za-z0-9]/.test(pw)) problems.push('a special character');
-  return problems;
-}
+import { passwordProblems } from '../validation';
 
 export default function ResetPassword() {
   const { notify } = useNotice();

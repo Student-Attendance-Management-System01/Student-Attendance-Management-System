@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { loginErrorMessage, useAuth } from '../auth';
 import { NoticeBar } from '../notice';
+import { EMAIL_RE } from '../validation';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateLogin(email, password) {
   const errors = {};

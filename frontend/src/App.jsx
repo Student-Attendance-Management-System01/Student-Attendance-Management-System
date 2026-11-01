@@ -5,9 +5,11 @@ import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import NotFound from './pages/NotFound.jsx';
+import AdminUsers from './pages/AdminUsers.jsx';
+import AdminCourses from './pages/AdminCourses.jsx';
 import { NoticeProvider } from './notice';
 import { AuthProvider, useAuth } from './auth';
-import { PublicOnly, RequireAuth } from './guards';
+import { PublicOnly, RequireAuth, RequireRole } from './guards';
 
 function ProtectedShell() {
   const { user, logout } = useAuth();
@@ -20,6 +22,10 @@ export function AppRoutes() {
     <Route path="/reset-password" element={<PublicOnly><ResetPassword /></PublicOnly>} />
     <Route element={<ProtectedShell />}>
       <Route index element={<Home />} />
+      <Route path="admin" element={<RequireRole roles={['ADMIN']} />}>
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="courses" element={<AdminCourses />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Route>
   </Routes>;

@@ -2,7 +2,9 @@
 // the backend's role checks remain the security boundary.
 export const NAV = {
   ADMIN: [
-    { to: '/', label: 'Overview', icon: '⌂' }
+    { to: '/', label: 'Overview', icon: '⌂' },
+    { to: '/admin/users', label: 'User accounts', icon: '♙' },
+    { to: '/admin/courses', label: 'Courses & rosters', icon: '▦' }
   ],
   FACULTY: [
     { to: '/', label: 'Overview', icon: '⌂' }

@@ -23,3 +23,25 @@ export function fmtDate(value) {
   if (!value) return '—';
   try { return new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); } catch { return value; }
 }
+
+/** Labelled form field with an inline validation message. */
+export function Field({ label, error, hint, children }) {
+  return <label>{label}{children}{hint && <small className="field-hint">{hint}</small>}{error && <small className="field-error" role="alert">{error}</small>}</label>;
+}
+
+/** Accessible modal dialog. */
+export function Modal({ title, eyebrow, onClose, children }) {
+  React.useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return <div className="modal-backdrop" role="presentation" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+    <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button className="icon-button modal-close" onClick={onClose} aria-label="Close">×</button>
+      {eyebrow && <div className="eyebrow">{eyebrow}</div>}
+      <h2 id="modal-title">{title}</h2>
+      {children}
+    </section>
+  </div>;
+}
