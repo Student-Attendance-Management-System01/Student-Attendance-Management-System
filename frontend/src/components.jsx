@@ -45,3 +45,9 @@ export function Modal({ title, eyebrow, onClose, children }) {
     </section>
   </div>;
 }
+
+/** YYYY-MM-DD in the browser's local time zone (toISOString would give the UTC date, which is wrong before 05:30 IST). */
+export function localDate(d = new Date()) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}

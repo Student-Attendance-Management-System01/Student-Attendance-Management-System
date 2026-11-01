@@ -4,13 +4,20 @@ export const NAV = {
   ADMIN: [
     { to: '/', label: 'Overview', icon: '⌂' },
     { to: '/admin/users', label: 'User accounts', icon: '♙' },
-    { to: '/admin/courses', label: 'Courses & rosters', icon: '▦' }
+    { to: '/admin/courses', label: 'Courses & rosters', icon: '▦' },
+    { to: '/reports', label: 'Reports', icon: '▤' },
+    { to: '/audit', label: 'Audit log', icon: '⌕' }
   ],
   FACULTY: [
-    { to: '/', label: 'Overview', icon: '⌂' }
+    { to: '/', label: 'Overview', icon: '⌂' },
+    { to: '/sessions', label: 'Sessions & attendance', icon: '✓' },
+    { to: '/corrections', label: 'Correction requests', icon: '↺' },
+    { to: '/reports', label: 'Reports', icon: '▤' }
   ],
   STUDENT: [
-    { to: '/', label: 'Overview', icon: '⌂' }
+    { to: '/', label: 'Overview', icon: '⌂' },
+    { to: '/my-attendance', label: 'My attendance', icon: '✓' },
+    { to: '/corrections', label: 'My corrections', icon: '↺' }
   ]
 };
 
