@@ -2,19 +2,35 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppShell from './layout/AppShell.jsx';
 import Home from './pages/Home.jsx';
+import Login from './pages/Login.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 import NotFound from './pages/NotFound.jsx';
 import { NoticeProvider } from './notice';
+import { AuthProvider, useAuth } from './auth';
+import { PublicOnly, RequireAuth } from './guards';
 
-// Application shell only. Authentication and role-aware routes are added in #14.
+function ProtectedShell() {
+  const { user, logout } = useAuth();
+  return <RequireAuth><AppShell user={user} onLogout={logout} /></RequireAuth>;
+}
+
+export function AppRoutes() {
+  return <Routes>
+    <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
+    <Route path="/reset-password" element={<PublicOnly><ResetPassword /></PublicOnly>} />
+    <Route element={<ProtectedShell />}>
+      <Route index element={<Home />} />
+      <Route path="*" element={<NotFound />} />
+    </Route>
+  </Routes>;
+}
+
 export default function App() {
   return <NoticeProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AppShell user={null} />}>
-          <Route index element={<Home />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
   </NoticeProvider>;
 }

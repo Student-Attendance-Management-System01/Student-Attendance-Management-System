@@ -12,6 +12,23 @@ export const api = axios.create({
   timeout: 20000
 });
 
+// Called when an authenticated request comes back 401 (expired / revoked session).
+// The auth provider registers itself here so any screen's API call can end the session.
+let unauthorizedHandler = null;
+export function setUnauthorizedHandler(handler) { unauthorizedHandler = handler; }
+
+const AUTH_PATHS = ['/auth/login', '/auth/me', '/auth/csrf', '/auth/logout', '/auth/password-reset'];
+api.interceptors.response.use(
+  response => response,
+  error => {
+    const url = error?.config?.url || '';
+    if (error?.response?.status === 401 && !AUTH_PATHS.some(p => url.startsWith(p)) && unauthorizedHandler) {
+      unauthorizedHandler();
+    }
+    return Promise.reject(error);
+  }
+);
+
 /** Turns an axios error into a message that is safe to show to the user. */
 export function messageFrom(error) {
   const data = error?.response?.data;
