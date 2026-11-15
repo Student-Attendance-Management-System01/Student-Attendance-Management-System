@@ -16,7 +16,7 @@ public class NotificationOutbox {
     @Column(name="last_error", length=500) private String lastError;
     @Column(name="attachment_name", length=200) private String attachmentName;
     @Column(name="attachment_content_type", length=120) private String attachmentContentType;
-    @Lob @Column(name="attachment_content") private byte[] attachmentContent;
+    @Lob @Column(name="attachment_content", columnDefinition="LONGBLOB") private byte[] attachmentContent;
     @Column(name="created_at", nullable=false) private LocalDateTime createdAt;
     @Column(name="delivered_at") private LocalDateTime deliveredAt;
     @PrePersist void prePersist(){if(createdAt==null)createdAt=LocalDateTime.now(ZoneId.of("Asia/Kolkata"));if(nextAttemptAt==null)nextAttemptAt=createdAt;}

@@ -38,11 +38,6 @@ public class UserManagementService {
    audit.record(actor,"USER_UPDATED","USER",u.getInstitutionId(),old,u.getFullName()+"|"+u.getEmail()+"|"+u.getRole()+"|"+u.isActive(),null,req);return userDto(u);
  }
  @Transactional public Map<String,Object> deactivateUser(Long id,String actor,HttpServletRequest req){UserAccount u=users.findById(id).orElseThrow(()->SamsException.notFound("User not found"));if(u.getEmail().equalsIgnoreCase(actor))throw SamsException.badRequest("You cannot deactivate your own account");u.setActive(false);audit.record(actor,"USER_DEACTIVATED","USER",u.getInstitutionId(),"active","inactive",null,req);return userDto(u);}
- @Transactional public Map<String,Object> createSection(CourseSectionRequest r,String actor,HttpServletRequest req){
-   CourseSection s=new CourseSection();s.setCourseCode(r.courseCode().trim().toUpperCase(Locale.ROOT));s.setCourseName(r.courseName().trim());s.setSemester(r.semester().trim());s.setSection(r.section().trim().toUpperCase(Locale.ROOT));s.setAcademicYear(r.academicYear().trim());
-   Set<UserAccount> faculty=new HashSet<>();for(Long id:r.facultyIds()) {UserAccount u=users.findById(id).orElseThrow(()->SamsException.notFound("Faculty user not found: "+id));if(u.getRole()!=UserRole.FACULTY||!u.isActive())throw SamsException.badRequest("Every assigned user must be an active Faculty member");faculty.add(u);}s.setFaculty(faculty);sections.save(s);
-   audit.record(actor,"COURSE_SECTION_CREATED","COURSE_SECTION",String.valueOf(s.getId()),null,s.getCourseCode()+"/"+s.getSection(),null,req);return sectionDto(s);
- }
  @Transactional(readOnly=true) public List<Map<String,Object>> listSections(String email,UserRole role){
    List<CourseSection> list;
    if(role==UserRole.ADMIN)list=sections.findAll();
@@ -51,14 +46,20 @@ public class UserManagementService {
    return list.stream().map(this::sectionDto).toList();
  }
  @Transactional public Map<String,Object> enrol(Long sectionId,EnrollmentRequest r,String actor,HttpServletRequest req){
-   CourseSection s=sections.findById(sectionId).orElseThrow(()->SamsException.notFound("Course section not found"));UserAccount student=users.findByInstitutionIdIgnoreCase(r.institutionId().trim()).orElseThrow(()->SamsException.notFound("Student not found"));
+   CourseSection s=sections.findById(sectionId).orElseThrow(()->SamsException.notFound("Course section not found"));UserAccount student=users.findByInstitutionIdIgnoreCase(r.institutionId().trim()).orElseThrow(()->SamsException.badRequest("Student not found: "+r.institutionId().trim()));
+   if(!s.isActive())throw SamsException.badRequest("Students cannot be enrolled in an inactive course section");
    if(student.getRole()!=UserRole.STUDENT||!student.isActive())throw SamsException.badRequest("Only active student accounts can be enrolled");
    if(enrolments.existsByCourseSection_IdAndStudent_Id(sectionId,student.getId()))throw SamsException.conflict("SAMS-ENR-409","Student is already enrolled in this course section");
    Enrollment e=enrolments.save(new Enrollment(s,student));audit.record(actor,"STUDENT_ENROLLED","ENROLMENT",String.valueOf(e.getId()),null,student.getInstitutionId()+" -> "+s.getCourseCode(),null,req);return Map.of("id",e.getId(),"courseSectionId",sectionId,"studentId",student.getInstitutionId(),"studentName",student.getFullName());
  }
+ /** Runs inside a transaction so the lazily loaded students can be read (open-in-view is off). */
+ @Transactional(readOnly=true) public List<RosterResponse.RosterStudent> enrolledStudents(Long sectionId){
+   if(!sections.existsById(sectionId))throw SamsException.notFound("Course section not found");
+   return enrolments.findByCourseSection_IdOrderByStudent_FullNameAsc(sectionId).stream().map(RosterResponse.RosterStudent::of).toList();
+ }
  @Transactional public Map<String,Object> importEnrolments(Long sectionId,MultipartFile file,String actor,HttpServletRequest req){
    if(file==null||file.isEmpty())throw SamsException.badRequest("CSV file is required");if(file.getSize()>2*1024*1024)throw new SamsException(HttpStatus.BAD_REQUEST,"SAMS-IMP-400","CSV file must be 2 MB or smaller");
-   CourseSection s=sections.findById(sectionId).orElseThrow(()->SamsException.notFound("Course section not found"));int imported=0,row=0;List<Map<String,Object>> errors=new ArrayList<>();
+   CourseSection s=sections.findById(sectionId).orElseThrow(()->SamsException.notFound("Course section not found"));if(!s.isActive())throw SamsException.badRequest("Students cannot be enrolled in an inactive course section");int imported=0,row=0;List<Map<String,Object>> errors=new ArrayList<>();
    try(CSVReader reader=new CSVReader(new InputStreamReader(file.getInputStream(),StandardCharsets.UTF_8))){
      String[] cols=reader.readNext();if(cols==null)throw SamsException.badRequest("CSV is empty");int idIndex=-1;for(int i=0;i<cols.length;i++){if("institutionId".equalsIgnoreCase(cols[i].trim())||"studentId".equalsIgnoreCase(cols[i].trim())){idIndex=i;break;}}
      if(idIndex<0)throw SamsException.badRequest("CSV must have a header named institutionId or studentId");String[] cells;
