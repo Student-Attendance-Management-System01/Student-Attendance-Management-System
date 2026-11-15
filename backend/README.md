@@ -30,6 +30,10 @@ Machine-specific values and secrets come from environment variables; nothing sec
 | `SAMS_DB_USERNAME` | no | `sams` | Database user |
 | `SAMS_DB_PASSWORD` | yes | (empty) | Database password |
 | `SERVER_PORT` | no | `8080` | HTTP port |
+| `SAMS_BOOTSTRAP_ADMIN_EMAIL` | no | (empty) | Email for initial administrator account |
+| `SAMS_BOOTSTRAP_ADMIN_PASSWORD` | no | (empty) | Password for initial administrator account |
+| `SAMS_BOOTSTRAP_ADMIN_ID` | no | `ADM001` | Institution ID for initial administrator |
+| `SAMS_BOOTSTRAP_ADMIN_NAME` | no | `SAMS Administrator` | Full name for initial administrator |
 
 ## Build and test
 
